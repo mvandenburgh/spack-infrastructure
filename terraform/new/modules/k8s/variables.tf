@@ -73,3 +73,20 @@ variable "ses_email_iam_user_access_key" {
   description = "The access key for the IAM user to use for SES email sending"
   type        = string
 }
+
+variable "opensearch_endpoint" {
+  type = string
+}
+
+variable "opensearch_master_user_name" {
+  type = string
+}
+
+variable "opensearch_master_user_password" {
+  type      = string
+  sensitive = true
+}
+
+variable "fluent_bit_role_arn" {
+  type = string
+}

@@ -53,3 +53,20 @@ output "ses_iam_user_access_key" {
   value     = aws_iam_access_key.ses_user.ses_smtp_password_v4
   sensitive = true
 }
+
+output "opensearch_endpoint" {
+  value = aws_opensearch_domain.spack.endpoint
+}
+
+output "opensearch_master_user_name" {
+  value = local.opensearch_master_user_name
+}
+
+output "opensearch_master_user_password" {
+  value     = random_password.opensearch_password.result
+  sensitive = true
+}
+
+output "fluent_bit_role_arn" {
+  value = aws_iam_role.fluent_bit_role.arn
+}

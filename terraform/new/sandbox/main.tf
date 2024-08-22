@@ -13,6 +13,10 @@ module "aws" {
   # TODO: these are taken from the current staging deployment
   gitlab_db_instance_class    = "db.t3.small"
   gitlab_redis_instance_class = "cache.t4g.small"
+
+  # TODO: temporarily using an OpenSearch instance type from staging deployment
+  opensearch_instance_type = "t3.small.search"
+  opensearch_volume_size   = 100
 }
 
 module "k8s" {
@@ -38,4 +42,9 @@ module "k8s" {
   ses_email_domain              = local.ses_email_domain
   ses_email_iam_user_name       = module.aws.ses_iam_user_name
   ses_email_iam_user_access_key = module.aws.ses_iam_user_access_key
+
+  opensearch_endpoint             = module.aws.opensearch_endpoint
+  opensearch_master_user_name     = module.aws.opensearch_master_user_name
+  opensearch_master_user_password = module.aws.opensearch_master_user_password
+  fluent_bit_role_arn             = module.aws.fluent_bit_role_arn
 }
