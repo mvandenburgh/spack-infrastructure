@@ -27,6 +27,10 @@ module "eks" {
     vpc-cni = {
       addon_version = "v1.18.3-eksbuild.2"
     }
+    aws-ebs-csi-driver = {
+      addon_version            = "v1.33.0-eksbuild.1"
+      service_account_role_arn = aws_iam_role.ebs_efs_csi_driver.arn
+    }
   }
 
   vpc_id     = module.vpc.vpc_id
@@ -59,4 +63,164 @@ module "eks" {
   node_security_group_tags = {
     "karpenter.sh/discovery" = local.cluster_name
   }
+}
+
+resource "aws_iam_role" "ebs_efs_csi_driver" {
+  name = "EbsEfsDriverRole-${var.deployment_name}"
+  assume_role_policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Principal" : {
+          "Federated" : module.eks.oidc_provider_arn
+        },
+        "Action" : "sts:AssumeRoleWithWebIdentity",
+        "Condition" : {
+          "StringEquals" : {
+            "${module.eks.oidc_provider}:sub" : "system:serviceaccount:kube-system:ebs-csi-controller-sa",
+            "${module.eks.oidc_provider}:aud" : "sts.amazonaws.com"
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "ebs_efs_csi_driver" {
+  name = "EbsEfsDriverPolicy-${var.deployment_name}"
+  role = aws_iam_role.ebs_efs_csi_driver.id
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ec2:CreateSnapshot",
+          "ec2:AttachVolume",
+          "ec2:DetachVolume",
+          "ec2:ModifyVolume",
+          "ec2:DescribeAvailabilityZones",
+          "ec2:DescribeInstances",
+          "ec2:DescribeSnapshots",
+          "ec2:DescribeTags",
+          "ec2:DescribeVolumes",
+          "ec2:DescribeVolumesModifications"
+        ],
+        "Resource" : "*"
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ec2:CreateTags"
+        ],
+        "Resource" : [
+          "arn:aws:ec2:*:*:volume/*",
+          "arn:aws:ec2:*:*:snapshot/*"
+        ],
+        "Condition" : {
+          "StringEquals" : {
+            "ec2:CreateAction" : [
+              "CreateVolume",
+              "CreateSnapshot"
+            ]
+          }
+        }
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ec2:DeleteTags"
+        ],
+        "Resource" : [
+          "arn:aws:ec2:*:*:volume/*",
+          "arn:aws:ec2:*:*:snapshot/*"
+        ]
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ec2:CreateVolume"
+        ],
+        "Resource" : "*",
+        "Condition" : {
+          "StringLike" : {
+            "aws:RequestTag/ebs.csi.aws.com/cluster" : "true"
+          }
+        }
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ec2:CreateVolume"
+        ],
+        "Resource" : "*",
+        "Condition" : {
+          "StringLike" : {
+            "aws:RequestTag/CSIVolumeName" : "*"
+          }
+        }
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ec2:DeleteVolume"
+        ],
+        "Resource" : "*",
+        "Condition" : {
+          "StringLike" : {
+            "ec2:ResourceTag/ebs.csi.aws.com/cluster" : "true"
+          }
+        }
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ec2:DeleteVolume"
+        ],
+        "Resource" : "*",
+        "Condition" : {
+          "StringLike" : {
+            "ec2:ResourceTag/CSIVolumeName" : "*"
+          }
+        }
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ec2:DeleteVolume"
+        ],
+        "Resource" : "*",
+        "Condition" : {
+          "StringLike" : {
+            "ec2:ResourceTag/kubernetes.io/created-for/pvc/name" : "*"
+          }
+        }
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ec2:DeleteSnapshot"
+        ],
+        "Resource" : "*",
+        "Condition" : {
+          "StringLike" : {
+            "ec2:ResourceTag/CSIVolumeSnapshotName" : "*"
+          }
+        }
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ec2:DeleteSnapshot"
+        ],
+        "Resource" : "*",
+        "Condition" : {
+          "StringLike" : {
+            "ec2:ResourceTag/ebs.csi.aws.com/cluster" : "true"
+          }
+        }
+      }
+    ]
+  })
 }
