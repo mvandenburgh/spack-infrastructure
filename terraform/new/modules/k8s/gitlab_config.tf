@@ -125,3 +125,46 @@ resource "kubectl_manifest" "gitlab_object_stores_backup_secret" {
         bucket_location = ${data.aws_region.current.name}
   YAML
 }
+
+locals {
+  gitlab_email_domain      = "gitlab.${var.ses_email_domain}"
+  smtp_secret_name         = "gitlab-ses-secrets"
+  smtp_secret_password_key = "smtp-password"
+}
+
+resource "kubectl_manifest" "ses_config_map" {
+  yaml_body = <<-YAML
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: gitlab-ses-config
+      namespace: ${kubectl_manifest.gitlab_namespace.name}
+    data:
+      values.yaml: |
+        global:
+          email:
+            from: admin@${local.gitlab_email_domain}
+            reply_to: noreply@${local.gitlab_email_domain}
+          smtp:
+            enabled: true
+            address: email-smtp.${data.aws_region.current.name}.amazonaws.com
+            user_name: ${var.ses_email_iam_user_name}
+            password:
+              secret: ${local.smtp_secret_name}
+              key: ${local.smtp_secret_password_key}
+            port: 465
+            tls: true
+  YAML
+}
+
+resource "kubectl_manifest" "ses_secrets" {
+  yaml_body = <<-YAML
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${local.smtp_secret_name}
+      namespace: ${kubectl_manifest.gitlab_namespace.name}
+    data:
+      ${local.smtp_secret_password_key}: ${base64encode("${var.ses_email_iam_user_access_key}")}
+  YAML
+}

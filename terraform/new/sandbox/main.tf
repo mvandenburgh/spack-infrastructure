@@ -1,8 +1,14 @@
+locals {
+  deployment_name  = "sandbox"
+  ses_email_domain = "sandbox.spack.io"
+}
 module "aws" {
   source = "../modules/aws"
 
-  deployment_name = "sandbox"
+  deployment_name = local.deployment_name
   region          = "us-east-2"
+
+  ses_email_domain = local.ses_email_domain
 
   # TODO: these are taken from the current staging deployment
   gitlab_db_instance_class    = "db.t3.small"
@@ -23,9 +29,13 @@ module "k8s" {
   flux_github_token = module.aws.flux_github_token
   flux_path         = "terraform/new/sandbox/yamls/"
 
-  gitlab_db_hostname = module.aws.gitlab_db_hostname
-  gitlab_db_password = module.aws.gitlab_db_password
+  gitlab_db_hostname    = module.aws.gitlab_db_hostname
+  gitlab_db_password    = module.aws.gitlab_db_password
   gitlab_redis_hostname = module.aws.gitlab_redis_hostname
-  gitlab_s3_buckets = module.aws.gitlab_s3_buckets
-  gitlab_s3_role_arn = module.aws.gitlab_s3_role_arn
+  gitlab_s3_buckets     = module.aws.gitlab_s3_buckets
+  gitlab_s3_role_arn    = module.aws.gitlab_s3_role_arn
+
+  ses_email_domain              = local.ses_email_domain
+  ses_email_iam_user_name       = module.aws.ses_iam_user_name
+  ses_email_iam_user_access_key = module.aws.ses_iam_user_access_key
 }

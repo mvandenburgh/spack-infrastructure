@@ -44,3 +44,12 @@ output "gitlab_s3_buckets" {
 output "gitlab_s3_role_arn" {
   value = aws_iam_role.gitlab_object_stores.arn
 }
+
+output "ses_iam_user_name" {
+  value = aws_iam_user.ses_user.name
+}
+
+output "ses_iam_user_access_key" {
+  value     = aws_iam_access_key.ses_user.ses_smtp_password_v4
+  sensitive = true
+}

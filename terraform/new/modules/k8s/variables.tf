@@ -57,3 +57,19 @@ variable "gitlab_s3_role_arn" {
 variable "gitlab_s3_buckets" {
   type = map(string)
 }
+
+variable "ses_email_domain" {
+  description = "value of the domain to be used for SES email sending."
+  type        = string
+}
+
+variable "ses_email_iam_user_name" {
+  description = "The name of the IAM user to create for SES email sending"
+  type        = string
+
+}
+
+variable "ses_email_iam_user_access_key" {
+  description = "The access key for the IAM user to use for SES email sending"
+  type        = string
+}
