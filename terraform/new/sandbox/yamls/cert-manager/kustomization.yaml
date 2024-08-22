@@ -5,4 +5,3 @@ resources:
 - ../../../../../k8s/production/cert-manager/release.yaml
 - ../../../../../k8s/production/cert-manager/crds.yaml
 - ../../../../../k8s/production/cert-manager/issuers/letsencrypt-staging.yaml
-- ../../../../../k8s/production/cert-manager/issuers/letsencrypt.yaml
