@@ -37,3 +37,23 @@ variable "flux_path" {
   description = "Path relative to the repository root that Flux will use to sync resources"
   type        = string
 }
+
+variable "gitlab_db_password" {
+  type = string
+}
+
+variable "gitlab_db_hostname" {
+  type = string
+}
+
+variable "gitlab_redis_hostname" {
+  type = string
+}
+
+variable "gitlab_s3_role_arn" {
+  type = string
+}
+
+variable "gitlab_s3_buckets" {
+  type = map(string)
+}

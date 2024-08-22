@@ -3,6 +3,10 @@ module "aws" {
 
   deployment_name = "sandbox"
   region          = "us-east-2"
+
+  # TODO: these are taken from the current staging deployment
+  gitlab_db_instance_class    = "db.t3.small"
+  gitlab_redis_instance_class = "cache.t4g.small"
 }
 
 module "k8s" {
@@ -18,4 +22,10 @@ module "k8s" {
 
   flux_github_token = module.aws.flux_github_token
   flux_path         = "terraform/new/sandbox/yamls/"
+
+  gitlab_db_hostname = module.aws.gitlab_db_hostname
+  gitlab_db_password = module.aws.gitlab_db_password
+  gitlab_redis_hostname = module.aws.gitlab_redis_hostname
+  gitlab_s3_buckets = module.aws.gitlab_s3_buckets
+  gitlab_s3_role_arn = module.aws.gitlab_s3_role_arn
 }
