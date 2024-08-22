@@ -2,7 +2,7 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.24.0"
 
-  cluster_name    = var.deployment_name
+  cluster_name    = "spack-${var.deployment_name}"
   cluster_version = "1.30"
 
   # Give the Terraform identity admin access to the cluster

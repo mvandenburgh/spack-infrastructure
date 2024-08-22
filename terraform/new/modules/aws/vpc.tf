@@ -14,7 +14,7 @@ data "aws_availability_zones" "available" {
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name = var.deployment_name
+  name = "spack-${var.deployment_name}"
   cidr = local.vpc_cidr
 
   azs             = local.azs

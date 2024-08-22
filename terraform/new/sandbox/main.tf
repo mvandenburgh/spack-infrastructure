@@ -1,14 +1,14 @@
 module "aws" {
   source = "../modules/aws"
 
-  deployment_name = "spack-sandbox"
+  deployment_name = "sandbox"
   region          = "us-east-2"
 }
 
 module "k8s" {
   source = "../modules/k8s"
 
-  deployment_name = "spack-sandbox"
+  deployment_name = local.deployment_name
 
   eks_cluster_name                       = module.aws.cluster_name
   eks_cluster_endpoint                   = module.aws.cluster_endpoint
