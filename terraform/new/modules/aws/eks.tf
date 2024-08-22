@@ -1,8 +1,12 @@
+locals {
+  cluster_name = "spack-${var.deployment_name}"
+}
+
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.24.0"
 
-  cluster_name    = "spack-${var.deployment_name}"
+  cluster_name    = local.cluster_name
   cluster_version = "1.30"
 
   # Give the Terraform identity admin access to the cluster
@@ -53,6 +57,6 @@ module "eks" {
   }
 
   node_security_group_tags = {
-    "karpenter.sh/discovery" = var.deployment_name
+    "karpenter.sh/discovery" = local.cluster_name
   }
 }

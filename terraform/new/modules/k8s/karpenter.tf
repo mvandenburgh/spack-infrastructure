@@ -47,19 +47,13 @@ resource "kubectl_manifest" "karpenter_node_template" {
       amiFamily: AL2
       role: ${var.karpenter_node_iam_role_name}
       subnetSelectorTerms:
-        # This value *must* match one of the tags placed on the subnets for this
-        # EKS cluster (see vpc.tf for these).
-        # We use the "deployment_name" variable here instead of the full cluster name
-        # because the full cluster name isn't available at the time that we bootstrap
-        # the VPC resources (including subnets). However, "deployment_name" is also
-        # a unique-per-cluster value, so it should work just as well.
         - tags:
-            karpenter.sh/discovery: ${var.deployment_name}
+            karpenter.sh/discovery: ${var.eks_cluster_name}
       securityGroupSelectorTerms:
         - tags:
-            karpenter.sh/discovery: ${var.deployment_name}
+            karpenter.sh/discovery: ${var.eks_cluster_name}
       tags:
-        karpenter.sh/discovery: ${var.deployment_name}
+        karpenter.sh/discovery: ${var.eks_cluster_name}
       blockDeviceMappings:
         - deviceName: /dev/xvda
           ebs:
