@@ -33,3 +33,10 @@ patches:
       - op: replace
         path: /spec/values/global/hosts/ssh
         value: ssh.gitlab.sandbox.spack.io
+      - op: add
+        path: /spec/dependsOn
+        value:
+          - name: cert-manager
+            namespace: cert-manager
+          - name: ingress-nginx
+            namespace: ingress-nginx
