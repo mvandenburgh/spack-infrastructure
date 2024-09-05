@@ -17,3 +17,7 @@ output "karpenter_queue_name" {
 output "karpenter_node_iam_role_name" {
   value = module.karpenter.node_iam_role_name
 }
+
+output "flux_github_token" {
+  value = jsondecode(data.aws_secretsmanager_secret_version.flux_github_token.secret_string).flux_github_token
+}
